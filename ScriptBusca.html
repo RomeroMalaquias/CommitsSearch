@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="https://assets-cdn.github.com/assets/github2/index-9adfd3fe252daded04ac2e41eca7b7867c318873ee1555e67c15692d2b9fe041.css">
+		<link rel="stylesheet" type="text/css" href="https://assets-cdn.github.com/assets/github/index-d80e093fe7c48ff920ce83dfd2ad7c02806722220d164b49101ed783098ea618.css">
+
+		<script>
+		var page = 1, result = [], repo = '', project = '', token = '', searchWord='';
+			function startSearch() {
+				updateHeaders();
+				page = 1;
+				var params = {};
+				params.url = 'https://api.github.com/repos/' + repo + '/' +  project + '/commits';
+				params.result = [];
+				params.searchWord = searchWord;	
+				params.token = token;
+				console.log(params);
+				params = search(params);			
+			
+			}
+			function updateHeaders() {
+				repo = $('#user').val();
+				project = $('#repository').val();
+				token = $('#token').val();
+				searchWord = $('#key').val();
+				$('#user-title').html(repo);
+				$('#repo-title').html(project);
+			}
+			function search(params) {
+			updateHeaders();
+				$.ajax({
+				  url: params.url,
+				  data: {page: page, per_page: 100, access_token:params.token},
+				  success: function (data) {
+					for (i = 0; i < data.length ; i ++) {
+						if (data[i].commit.message.toLowerCase().indexOf(params.searchWord.toLowerCase()) !== -1) {
+							result.push(data[i]);
+						}
+					
+					}
+					if (data.length !== 0) {
+						page++;
+						params = search(params);
+					} else {
+						console.log(result);
+						console.log('total pages:' + page);
+						updateResultList();
+						return params;
+					}
+				  },
+				  error: function (){
+					updateResultList();
+				  },
+				  dataType: 'json'
+				});
+				updateResultList();
+			}
+			
+			function updateResultList(){
+				console.log('UPDATING');
+				$('#resultList').empty();
+				for (i = 0; i < result.length; i++) {
+				
+					insertRow(result[i]);
+				
+				}
+			
+			}
+			
+			function insertRow(data) {			
+				$('#resultList').append(
+				'<li class="commit commits-list-item table-list-item js-navigation-item js-details-container js-socket-channel js-updatable-content navigation-focus" >'+
+
+				  '<div class="table-list-cell commit-avatar-cell">'+
+					'<div class="avatar-parent-child">' +
+					'<a ><img alt="@RomeroMalaquias" class="avatar" data-user="1242275" height="36" src="https://2.gravatar.com/avatar/2b0640296d0722b9de5286b018ddff35?d=https%3A%2F%2Fassets-cdn.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png&r=x&s=140" width="36"></a>' +
+					'</div>' +
+				  '</div>' +
+				  '<div class="table-list-cell">' +
+					'<p class="commit-title ">' +
+						'<a href="https://github.com/' + repo + '/' + project + '/commit/' + data.sha +'" class="message" data-pjax="true" title="' + data.commit.message + '">' + data.commit.message + '</a>' +
+
+					
+					'</p>' +
+
+					
+
+				  '</div>'  +
+
+				'</li>'
+				
+				);
+			
+			}
+			
+		
+		</script>
+		<style>
+		.js-site-search-focus.js-site-search-field.is-clearable.chromeless-input {
+			width: 100px;
+		}
+		.form-search-container {
+			width: 210px !important;
+		} 
+		</style>
+	</head>
+	<body>	
+        <div class="header header-logged-in true" role="banner">
+  <div class="container clearfix">
+
+    <a class="header-logo-invertocat" href="https://github.com/" data-hotkey="g d" aria-label="Homepage" data-ga-click="Header, go to dashboard, icon:logo">
+  <span class="mega-octicon octicon-mark-github"></span>
+</a>
+
+		
+      <div class="site-search repo-scope js-site-search" role="search">
+	  
+	    <form accept-charset="UTF-8"  class="form-search-container" ><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="✓"></div>
+		  <label class="js-chromeless-input-container form-control">
+			<div class="scope-badge">User/Company</div>
+			<input type="text" class="js-site-search-focus js-site-search-field is-clearable chromeless-input" data-hotkey="s" name="q" placeholder="User"  tabindex="1" autocapitalize="off" id="user">
+		  </label>  
+		</form>
+		<form accept-charset="UTF-8"  class="form-search-container" ><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="✓"></div>
+		  <label class="js-chromeless-input-container form-control">
+			<div class="scope-badge">Repository</div>
+			<input type="text" class="js-site-search-focus js-site-search-field is-clearable chromeless-input" data-hotkey="s" name="q" placeholder="Repository"  tabindex="1" autocapitalize="off" id="repository">
+		  </label>  
+		</form>
+		<form accept-charset="UTF-8"  class="form-search-container" ><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="✓"></div>
+		  <label class="js-chromeless-input-container form-control">
+			<div class="scope-badge">Key</div>
+			<input type="text" class="js-site-search-focus js-site-search-field is-clearable chromeless-input" data-hotkey="s" name="q" placeholder="Key to search"  tabindex="1" autocapitalize="off" id="key">
+		  </label>  
+		</form>
+		<form accept-charset="UTF-8"  class="form-search-container" ><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="✓"></div>
+		  <label class="js-chromeless-input-container form-control">
+			<div class="scope-badge">Token</div>
+			<input type="text" class="js-site-search-focus js-site-search-field is-clearable chromeless-input" data-hotkey="s" name="q" placeholder="Token"  tabindex="1" autocapitalize="off" id="token">
+		  </label>  
+		</form>
+      </div>
+  
+  </div>
+  
+
+</div>
+
+        
+
+  
+</div></div>
+    <div class="pagehead repohead instapaper_ignore readability-menu">
+      <div class="container">
+        
+
+	<ul class="pagehead-actions">
+
+  <li>
+      <form accept-charset="UTF-8" action="/notifications/subscribe" class="js-social-container" data-autosubmit="true" data-remote="true" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="✓"><input name="authenticity_token" type="hidden" value="aamj+ktBhHTnXrqAtdrovLMpdcGOPH3bhwHdxg40PoL4xpAds67p2hbRX7D/vxFhd9ZUHhVwlZMqwksrS1bMjA=="></div>    <input id="repository_id" name="repository_id" type="hidden" value="11740880">
+
+      <div class="select-menu js-menu-container js-select-menu">
+        <a href="javascript:startSearch();" class="btn btn-sm" role="button" tabindex="0" aria-haspopup="true">
+          <span class="js-select-button">
+            <span class="octicon octicon-eye"></span>
+            Search
+          </span>
+        </a>
+       
+      </div>
+</form>
+  </li>
+
+</ul>
+        <h1 itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb" class="entry-title private">
+          <span class="mega-octicon octicon-repo"></span>
+          <span class="author"><a class="url fn" itemprop="url" rel="author" ><span itemprop="title" id="user-title"></span></a></span><!--
+       --><span class="path-divider">/</span><!--
+       --><strong><a class="js-current-repository" id="repo-title"></a></strong>
+
+          <span class="page-context-loader">
+            <img alt="" height="16" src="https://assets-cdn.github.com/assets/spinners/octocat-spinner-32-e513294efa576953719e4e2de888dd9cf929b7d62ed8d05f25e731d02452ab6c.gif" width="16">
+          </span>
+
+        </h1>
+      </div><!-- /.container -->
+    </div><!-- /.repohead -->
+
+    <div class="container">
+      <div class="repository-with-sidebar repo-container new-discussion-timeline">
+        <div class="repository-sidebar clearfix">
+            
+
+
+             
+</div>
+
+  
+    
+
+  <div class="commits-listing commits-listing-padded js-navigation-container js-active-navigation-container" data-navigation-scroll="page">
+
+    
+
+
+
+
+    
+<div class="commit-group-title">
+  <span class="octicon octicon-git-commit"></span>Commits
+</div>
+
+<ol class="commit-group table-list table-list-bordered" id="resultList">
+    
+
+    
+
+
+    
+
+
+</ol>
+
+    
+
+
+
+
+    
+
+
+
+
+    
+
+
+
+
+    
+
+
+
+
+    
+
+
+
+
+    
+
+
+
+
+
+  </div>
+
+
+
+  
+
+
+
+
+</div>
+
+      </div><!-- /.repo-container -->
+      <div class="modal-backdrop"></div>
+    </div><!-- /.container -->
+  </div><!-- /.site -->
+
+
+    </div>
+	</body>
+</html>
